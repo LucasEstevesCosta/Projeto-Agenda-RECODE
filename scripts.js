@@ -11,7 +11,7 @@ function showMenu() {
             'Escolha uma opção:\n' +
             '1 - Adicionar contato\n' +
             '2 - Listar contatos\n' +
-            '3 - Remover contato pelo número\n' +
+            '3 - Remover contato pela posição\n' +
             '4 - Remover contato pelo nome\n' +
             '0 - Sair'
         );
@@ -44,6 +44,11 @@ function addContact() {
     let addName = prompt('Digite o nome do contato:');
     let addTelephone = prompt('Digite o telefone do contato:')
 
+    while (nameIsEmpty(addName)) {
+        alert('O nome precisa ser preenchido.');
+        addName = prompt('Digite o nome do contato:');
+    }
+
     while (addTelephone.length !== 9) {
         alert('Telefone precisa ter 9 dígitos.');
         addTelephone = prompt('Digite o telefone do contato:')
@@ -65,7 +70,7 @@ function capitalizeFirstLetter(str) {
 
 
 function createContactList() {
-    if (agendaEmpty(false)) {
+    if (agendaIsEmpty(false)) {
         return;
     }
 
@@ -76,7 +81,7 @@ function createContactList() {
 };
 
 
-function agendaEmpty(msg = '', showAlert = true) {
+function agendaIsEmpty(msg = '', showAlert = true) {
     if (agenda.length === 0) {
         if (showAlert) {
             alert(msg);
@@ -87,9 +92,15 @@ function agendaEmpty(msg = '', showAlert = true) {
     }
 }
 
+function nameIsEmpty(name) {
+    if (!name) {
+        return true;
+    }
+}
+
 
 function showContactList() {
-    if (agendaEmpty(msg = 'Não há contatos para exibir.')) {
+    if (agendaIsEmpty(msg = 'Não há contatos para exibir.')) {
         return;
     }
     const contactList = createContactList()
@@ -98,17 +109,23 @@ function showContactList() {
 
 
 function removeContactByIndex() {
-    if (agendaEmpty(msg = 'Não há contatos para remover.')) {
+    if (agendaIsEmpty(msg = 'Não há contatos para remover.')) {
         return;
     }
 
     const contactList = createContactList()
 
     const option = prompt(`${contactList}\n
-        Qual o número do contato que deseja remover?`
+        Qual a posição do contato que deseja remover?`
     );
 
-    const confirmation = prompt(`Tem certeza que deseja remover o contato ${agenda[option - 1].name}? [S] para sim e [N] para não`).toUpperCase();
+    if (nameIsEmpty(option)) {
+        alert('Opção inválida.');
+        return;
+    }
+
+    const removedContact = agenda[option - 1];
+    const confirmation = prompt(`Tem certeza que deseja remover o contato ${removedContact}? [S] para sim e [N] para não`).toUpperCase();
     if (confirmation === 'S') {
         agenda.splice(option - 1, 1);
         alert('Contato removido com sucesso.');
@@ -120,5 +137,26 @@ function removeContactByIndex() {
 
 
 function removeContactByName() {
+    if (agendaIsEmpty(msg = 'Não há contatos para remover.')) {
+        return;
+    }
 
+    const nameToRemove = prompt('Digite o nome do contato que deseja remover:');
+    const indexToRemove = agenda.findIndex((contact) => {
+        return contact.name.toLowerCase() === nameToRemove.toLowerCase();
+    })
+
+    if (indexToRemove === -1) {
+        alert('Contato nao encontrado.');
+        return;
+    } else {
+        const removedContact = agenda.splice(indexToRemove, 1)[0];
+        const confirmation = prompt(`Tem certeza que deseja remover o contato ${removedContact.name}? [S] para sim e [N] para não`).toUpperCase();
+        if (confirmation === 'S') {
+        alert(`Contato ${removedContact.name} removido com sucesso.`);
+        } else {
+            alert('Operação cancelada.');
+            return;
+        }
+    }
 }
